@@ -71,7 +71,12 @@ func createHomeTab() *fyne.Container {
 
 		go func() {
 			resp, err := http.Get(url)
-			log.Printf("run url:%s resp:%s err:%s\n", url, resp, err)
+
+			if resp != nil {
+				log.Printf("run url:%s resp:%+v err:%v\n", url, resp, err)
+			} else {
+				log.Printf("run url:%s resp:nil err:%v\n", url, err)
+			}
 			if err != nil {
 				fyne.Do(func() {
 					statusLabel.Text = "錯誤訊息:" + err.Error()

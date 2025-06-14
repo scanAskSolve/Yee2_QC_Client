@@ -66,12 +66,12 @@ func showVersion() {
 
 func main() {
 	logger := &lumberjack.Logger{
-		Filename:   "./logs/app.log", // log 檔案路徑
-		MaxSize:    10,               // 每個 log 檔最大 MB
-		MaxBackups: 200,              // 最多保留幾個舊 log
-		MaxAge:     60,               // 最多保留幾天
-		Compress:   false,            // 是否壓縮舊 log
-		LocalTime:  true,             // 使用本地時間分割
+		Filename:   "./logs/service.log", // log 檔案路徑
+		MaxSize:    10,                   // 每個 log 檔最大 MB
+		MaxBackups: 200,                  // 最多保留幾個舊 log
+		MaxAge:     60,                   // 最多保留幾天
+		Compress:   false,                // 是否壓縮舊 log
+		LocalTime:  true,                 // 使用本地時間分割
 	}
 	multiWriter := io.MultiWriter(os.Stdout, logger)
 	log.SetOutput(multiWriter)
@@ -94,18 +94,14 @@ func main() {
 		return
 	}
 
-	log.Println("🚀 啟動 %s v%s\n", os.Args[0], Version)
-	log.Println("建置時間: %s\n", BuildTime)
+	log.Printf("🚀 啟動 %s v%s\n", os.Args[0], Version)
+	log.Printf("建置時間: %s\n", BuildTime)
 
 	// 設定路由
 	http.HandleFunc("/version", versionHandler)
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "OK - %s v%s", os.Args[0], Version)
-	})
 
 	// 啟動服務
 	port := "8080"
-	log.Println("🌐 HTTP 服務啟動於端口 %s\n", port)
+	log.Printf("🌐 HTTP 服務啟動於端口 %s\n", port)
 	http.ListenAndServe(":"+port, nil)
 }
