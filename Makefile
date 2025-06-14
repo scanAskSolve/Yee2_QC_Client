@@ -8,8 +8,12 @@ CYAN = \033[0;36m
 WHITE = \033[0;37m
 NC = \033[0m # No Color
 
+
+SRC_DEVICE=device/client.go
+SRC_SERVICE=service/main.go
+
 # Variables
-APP_NAME = yee2_QC_client
+APP_NAME = yee2_qc
 BUILD_DIR = build
 
 # Version information
@@ -29,7 +33,7 @@ LDFLAGS = -ldflags "\
 # Default targets
 .PHONY: all clean linux windows darwin version info help
 
-all: linux windows darwin
+all: linux windows darwin linux-arm64
 
 # Show version information
 version:
@@ -71,28 +75,32 @@ help:
 linux:
 	@echo -e "$(YELLOW)Building Linux version ($(VERSION))...$(NC)"
 	@mkdir -p $(BUILD_DIR)/linux
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $(LDFLAGS) -o $(BUILD_DIR)/linux/$(APP_NAME) main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $(LDFLAGS) -o $(BUILD_DIR)/linux/$(APP_NAME)_device $(SRC_DEVICE)
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $(LDFLAGS) -o $(BUILD_DIR)/linux/$(APP_NAME)_service $(SRC_SERVICE)
 	@echo -e "$(GREEN)Linux build completed: $(BUILD_DIR)/linux/$(APP_NAME)$(NC)"
 
 # Windows build
 windows:
 	@echo -e "$(YELLOW)Building Windows version ($(VERSION))...$(NC)"
 	@mkdir -p $(BUILD_DIR)/windows
-	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(BUILD_DIR)/windows/$(APP_NAME).exe main.go
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(BUILD_DIR)/windows/$(APP_NAME)_device.exe $(SRC_DEVICE)
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o $(BUILD_DIR)/windows/$(APP_NAME)_service.exe $(SRC_SERVICE)
 	@echo -e "$(GREEN)Windows build completed: $(BUILD_DIR)/windows/$(APP_NAME).exe$(NC)"
 
 # macOS build
 darwin:
 	@echo -e "$(YELLOW)Building macOS version ($(VERSION))...$(NC)"
 	@mkdir -p $(BUILD_DIR)/darwin
-	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(BUILD_DIR)/darwin/$(APP_NAME) main.go
+	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(BUILD_DIR)/darwin/$(APP_NAME)_device $(SRC_DEVICE)
+	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(BUILD_DIR)/darwin/$(APP_NAME)_service $(SRC_SERVICE)
 	@echo -e "$(GREEN)macOS build completed: $(BUILD_DIR)/darwin/$(APP_NAME)$(NC)"
 
 # ARM build
 linux-arm64:
 	@echo -e "$(YELLOW)Building Linux ARM64 version ($(VERSION))...$(NC)"
 	@mkdir -p $(BUILD_DIR)/linux-arm64
-	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build $(LDFLAGS) -o $(BUILD_DIR)/linux-arm64/$(APP_NAME) main.go
+	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build $(LDFLAGS) -o $(BUILD_DIR)/linux-arm64/$(APP_NAME)_device $(SRC_DEVICE)
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $(LDFLAGS) -o $(BUILD_DIR)/linux-arm64/$(APP_NAME)_service $(SRC_SERVICE)
 	@echo -e "$(GREEN)Linux ARM64 build completed: $(BUILD_DIR)/linux-arm64/$(APP_NAME)$(NC)"
 
 # Clean

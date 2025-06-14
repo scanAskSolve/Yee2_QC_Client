@@ -3,6 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"gopkg.in/natefinch/lumberjack.v2"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -60,14 +65,37 @@ func showVersion() {
 }
 
 func main() {
+	logger := &lumberjack.Logger{
+		Filename:   "./logs/app.log", // log 檔案路徑
+		MaxSize:    10,               // 每個 log 檔最大 MB
+		MaxBackups: 200,              // 最多保留幾個舊 log
+		MaxAge:     60,               // 最多保留幾天
+		Compress:   false,            // 是否壓縮舊 log
+		LocalTime:  true,             // 使用本地時間分割
+	}
+	multiWriter := io.MultiWriter(os.Stdout, logger)
+	log.SetOutput(multiWriter)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	log.Println("service started")
+
+	myApp := app.NewWithID("com.yee2.qc")
+	myWindow := myApp.NewWindow("進階 Fyne 範例")
+	myWindow.Resize(fyne.NewSize(600, 400))
+
+	myWindow.SetMainMenu(CreateMen(myWindow))
+
+	myWindow.SetContent(CreateMainTab())
+	myWindow.ShowAndRun()
+
 	// 檢查命令列參數
 	if len(os.Args) > 1 && os.Args[1] == "version" {
 		showVersion()
 		return
 	}
 
-	fmt.Printf("🚀 啟動 %s v%s\n", os.Args[0], Version)
-	fmt.Printf("建置時間: %s\n", BuildTime)
+	log.Println("🚀 啟動 %s v%s\n", os.Args[0], Version)
+	log.Println("建置時間: %s\n", BuildTime)
 
 	// 設定路由
 	http.HandleFunc("/version", versionHandler)
@@ -78,6 +106,6 @@ func main() {
 
 	// 啟動服務
 	port := "8080"
-	fmt.Printf("🌐 HTTP 服務啟動於端口 %s\n", port)
+	log.Println("🌐 HTTP 服務啟動於端口 %s\n", port)
 	http.ListenAndServe(":"+port, nil)
 }
